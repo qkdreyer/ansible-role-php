@@ -18,7 +18,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - 7.4
           - 8.1
         distro: 
           - ubuntu2204
