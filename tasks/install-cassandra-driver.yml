@@ -40,7 +40,15 @@
   changed_when: false
   register: php_cassandra_check_install
 
-- name: Cassandra | download and compile cassandra php driver if it is not found
+- name: Cassandra | check cassandra php driver version if installed
+  shell:
+    cmd: /usr/bin/php{{ php_default_version_debian }} -r 'echo \phpversion("cassandra") . \PHP_EOL;'
+  failed_when: false
+  changed_when: false
+  register: php_cassandra_installed_version
+  when: php_cassandra_check_install.rc == 0
+
+- name: Cassandra | download and compile cassandra php driver
   block:
     - name: Cassandra | Set working directory
       set_fact: 
@@ -78,5 +86,7 @@
         - "{{ workdir }}"
       when: php_cassandra_php_driver_cleanup_build | bool
       
-  when: php_cassandra_check_install.rc == 1
+  when: 
+    - php_cassandra_check_install.rc == 1 or
+      php_cassandra_php_driver_version > 'v' + php_cassandra_installed_version.stdout
   tags: ['molecule-idempotence-notest']
